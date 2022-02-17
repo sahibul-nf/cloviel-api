@@ -27,6 +27,7 @@ func main() {
 	userEndpoint := api.Group("/api/v1")
 	{
 		userEndpoint.POST("/users", userHandler.RegisterUser)
+		userEndpoint.POST("/users/login", userHandler.LoginUser)
 	}
 
 	api.Run()
