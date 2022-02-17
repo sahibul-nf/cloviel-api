@@ -13,7 +13,7 @@ func FormatUser(user User, token string) UserFormatter {
 		ID:        int(user.ID),
 		Name:      user.Name,
 		Email:     user.Email,
-		Token:     user.Token,
+		Token:     token,
 		AvatarURL: user.AvatarFile,
 	}
 

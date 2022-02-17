@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"cloviel-api/auth"
 	"cloviel-api/helper"
 	"cloviel-api/user"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -33,8 +35,8 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	// send struct Input to service
 	newUser, err := h.userService.Register(input)
 	if err != nil {
-		response := helper.APIResponse("Register account failed", "error", http.StatusBadRequest, nil)
-		c.JSON(http.StatusBadRequest, response)
+		response := helper.APIResponse("Register account failed", "error", http.StatusInternalServerError, nil)
+		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
 
@@ -48,7 +50,7 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (h *userHandler) LoginUser(c *gin.Context)  {
+func (h *userHandler) LoginUser(c *gin.Context) {
 	// mapping input JSON to LoginInput
 	var input user.LoginInput
 	err := c.ShouldBindJSON(&input)
@@ -67,18 +69,79 @@ func (h *userHandler) LoginUser(c *gin.Context)  {
 	if err != nil {
 		if err != nil {
 			errorMessage := gin.H{"errors": err.Error()}
-	
-			response := helper.APIResponse("Login failed", "error", http.StatusUnprocessableEntity, errorMessage)
-			c.JSON(http.StatusUnprocessableEntity, response)
+
+			response := helper.APIResponse("Login failed", "error", http.StatusBadRequest, errorMessage)
+			c.JSON(http.StatusBadRequest, response)
 			return
 		}
 	}
 
 	// generate JWT token
+	token, err := auth.GenerateToken(int(loggedInUser.ID))
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+
+		response := helper.APIResponse("Login failed", "error", http.StatusInternalServerError, errorMessage)
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
 
 	// return final response to client
-	userFormatter := user.FormatUser(loggedInUser, "123")
+	userFormatter := user.FormatUser(loggedInUser, token)
 	response := helper.APIResponse("Successfully loggedin", "success", http.StatusOK, userFormatter)
 
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *userHandler) UploadAvatar(c *gin.Context) {
+	// get input form data
+	file, err := c.FormFile("avatar")
+	if err != nil {
+		data := gin.H{
+			"is_uploaded": false,
+			"errors":      err.Error(),
+		}
+
+		response := helper.APIResponse("Failed to upload avatar image", "error", http.StatusBadRequest, data)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// get userID from currentUser (middleware)
+	// currentUser := c.MustGet("currentUser").(user.User)
+	userID := 1
+
+	// make path location for save avatar
+	path := fmt.Sprintf("assets/user-avatars/%d-%s", userID, file.Filename)
+
+	// upload avatar ke server
+	err = c.SaveUploadedFile(file, path)
+	if err != nil {
+		data := gin.H{
+			"is_uploaded": false,
+			"errors":      err.Error(),
+		}
+
+		response := helper.APIResponse("Failed to upload avatar image", "error", http.StatusBadGateway, data)
+		c.JSON(http.StatusBadGateway, response)
+		return
+	}
+
+	// passing path to service for save to db
+	_, err = h.userService.SaveAvatar(int(userID), path)
+	if err != nil {
+		data := gin.H{
+			"is_uploaded": false,
+			"errors":      err.Error(),
+		}
+
+		response := helper.APIResponse("Failed to upload avatar image", "error", http.StatusInternalServerError, data)
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	data := gin.H{"is_uploaded": true, "errors": nil}
+
+	response := helper.APIResponse("Avatar successfuly uploaded", "success", http.StatusOK, data)
 	c.JSON(http.StatusOK, response)
 }

@@ -28,6 +28,7 @@ func main() {
 	{
 		userEndpoint.POST("/users", userHandler.RegisterUser)
 		userEndpoint.POST("/users/login", userHandler.LoginUser)
+		userEndpoint.POST("/users/avatar", userHandler.UploadAvatar)
 	}
 
 	api.Run()
