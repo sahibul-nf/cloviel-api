@@ -6,6 +6,7 @@ import (
 	"cloviel-api/user"
 	"fmt"
 	"net/http"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 )
@@ -94,6 +95,13 @@ func (h *userHandler) LoginUser(c *gin.Context) {
 }
 
 func (h *userHandler) UploadAvatar(c *gin.Context) {
+
+	fileExtSupport := []string{
+		".png",
+		".jpeg",
+		".jpg",
+	}
+
 	// get input form data
 	file, err := c.FormFile("avatar")
 	if err != nil {
@@ -104,6 +112,19 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 
 		response := helper.APIResponse("Failed to upload avatar image", "error", http.StatusBadRequest, data)
 		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// cek file extention
+	fileExtension := filepath.Ext(file.Filename)
+	if fileExtension != fileExtSupport[0] && fileExtension != fileExtSupport[1] && fileExtension != fileExtSupport[2] {
+		data := gin.H{
+			"is_uploaded": false,
+			"errors":      "The provided file format is not allowed. Please upload a JPEG or PNG image",
+		}
+
+		response := helper.APIResponse("Failed to upload avatar image", "error", http.StatusBadGateway, data)
+		c.JSON(http.StatusBadGateway, response)
 		return
 	}
 
