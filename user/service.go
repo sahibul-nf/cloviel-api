@@ -10,6 +10,7 @@ type Service interface {
 	Register(input RegisterInput) (User, error)
 	Login(input LoginInput) (User, error)
 	SaveAvatar(ID int, fileLocation string) (User, error)
+	GetUserByID(ID int) (User, error)
 }
 
 type service struct {
@@ -57,13 +58,13 @@ func (s *service) Login(input LoginInput) (User, error) {
 
 	// cek userID user tidak 0
 	if user.ID == 0 {
-		return user, errors.New("No user found on that email")
+		return user, errors.New("no user found on that email")
 	}
 
 	// cek kesesuaian password
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 	if err != nil {
-		return user, errors.New("Password does not match")
+		return user, errors.New("password does not match")
 	}
 
 	return user, nil
@@ -81,7 +82,22 @@ func (s *service) SaveAvatar(ID int, fileLocation string) (User, error) {
 	updateUser, err := s.repository.Update(user)
 	if err != nil {
 		return updateUser, err
-	} 
+	}
 
 	return updateUser, nil
+}
+
+func (s *service) GetUserByID(ID int) (User, error) {
+
+	user, err := s.repository.FindByID(ID)
+	if err != nil {
+		return user, err
+	}
+
+	// jika user tidak sesuai
+	if user.ID == 0 {
+		return user, errors.New("no user found on that ID")
+	}
+
+	return user, nil
 }

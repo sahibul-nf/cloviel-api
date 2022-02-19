@@ -13,10 +13,11 @@ import (
 
 type userHandler struct {
 	userService user.Service
+	authService auth.Service
 }
 
-func NewUserHandler(userService user.Service) *userHandler {
-	return &userHandler{userService}
+func NewUserHandler(userService user.Service, authService auth.Service) *userHandler {
+	return &userHandler{userService, authService}
 }
 
 func (h *userHandler) RegisterUser(c *gin.Context) {
@@ -78,7 +79,7 @@ func (h *userHandler) LoginUser(c *gin.Context) {
 	}
 
 	// generate JWT token
-	token, err := auth.GenerateToken(int(loggedInUser.ID))
+	token, err := h.authService.GenerateToken(int(loggedInUser.ID))
 	if err != nil {
 		errorMessage := gin.H{"errors": err.Error()}
 

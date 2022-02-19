@@ -1,9 +1,13 @@
 package auth
 
-import "github.com/dgrijalva/jwt-go"
+import (
+	"errors"
+
+	"github.com/dgrijalva/jwt-go"
+)
 
 type Service interface {
-	// ValidateToken(token string) (*jwt.Token, error)
+	ValidateToken(encodedToken string) (*jwt.Token, error)
 	GenerateToken(userID int) (string, error)
 }
 
@@ -18,7 +22,7 @@ var (
 	secretKey = "JWT_SECRET_KEY"
 )
 
-func GenerateToken(userID int) (string, error) {
+func (s *authService) GenerateToken(userID int) (string, error) {
 	// create payload data
 	claim := jwt.MapClaims{
 		"user_id": userID,
@@ -36,6 +40,20 @@ func GenerateToken(userID int) (string, error) {
 	return signedToken, nil
 }
 
-// func ValidateToken(token string)  {
+func (s *authService) ValidateToken(encodedToken string) (*jwt.Token, error) {
 
-// }
+	token, err := jwt.Parse(encodedToken, func(t *jwt.Token) (interface{}, error) {
+		_, ok := t.Method.(*jwt.SigningMethodHMAC)
+		if !ok {
+			return nil, errors.New("invalid token")
+		}
+
+		return []byte([]byte(secretKey)), nil
+	})
+
+	if err != nil {
+		return token, err
+	}
+
+	return token, err
+}
