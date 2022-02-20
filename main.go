@@ -3,6 +3,7 @@ package main
 import (
 	"cloviel-api/auth"
 	"cloviel-api/config"
+	"cloviel-api/event"
 	"cloviel-api/handler"
 	"cloviel-api/middleware"
 	"cloviel-api/user"
@@ -18,20 +19,29 @@ var (
 	userService = user.NewService(userRepo)
 	authService = auth.NewService()
 	userHandler = handler.NewUserHandler(userService, authService)
+
+	// event endpoint
+	eventRepo    = event.NewRepository(db)
+	eventService = event.NewService(eventRepo)
+	eventHandler = handler.NewEventHandler(eventService)
 )
 
 func main() {
 	defer config.CloseDatabaseConnection(db)
 
-	api := gin.Default()
-	api.Use(middleware.CORSMiddleware())
+	server := gin.Default()
+	server.Use(middleware.CORSMiddleware())
 
-	userEndpoint := api.Group("/api/v1")
+	apiV1 := server.Group("/api/v1")
 	{
-		userEndpoint.POST("/users", userHandler.RegisterUser)
-		userEndpoint.POST("/users/login", userHandler.LoginUser)
-		userEndpoint.POST("/users/avatar", middleware.AuthMiddleware(authService, userService), userHandler.UploadAvatar)
+		// user
+		apiV1.POST("/users", userHandler.RegisterUser)
+		apiV1.POST("/users/login", userHandler.LoginUser)
+		apiV1.POST("/users/avatar", middleware.AuthMiddleware(authService, userService), userHandler.UploadAvatar)
+
+		// event
+		apiV1.POST("/events/company", middleware.AuthMiddleware(authService, userService), eventHandler.CreateNewCompany)
 	}
 
-	api.Run()
+	server.Run()
 }
