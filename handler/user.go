@@ -130,8 +130,8 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 	}
 
 	// get userID from currentUser (middleware)
-	// currentUser := c.MustGet("currentUser").(user.User)
-	userID := 1
+	currentUser := c.MustGet("currentUser").(user.User)
+	userID := currentUser.ID
 
 	// make path location for save avatar
 	path := fmt.Sprintf("assets/user-avatars/%d-%s", userID, file.Filename)

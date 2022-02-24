@@ -2,6 +2,7 @@ package event
 
 type Service interface {
 	CreateNewCompany(input CompanyInput) (Company, error)
+	SaveCompanyLogo(ID int, fileLocation string) (Company, error)
 }
 
 type service struct {
@@ -25,4 +26,20 @@ func (s *service) CreateNewCompany(input CompanyInput) (Company, error) {
 	}
 
 	return newCompany, err
+}
+
+func (s *service) SaveCompanyLogo(ID int, fileLocation string) (Company, error) {
+
+	company, err := s.repository.FindCompanyByID(ID)
+	if err != nil {
+		return company, err
+	}
+
+	company.LogoURL = fileLocation
+	updateCompany, err := s.repository.Update(company)
+	if err != nil {
+		return company, err
+	}
+
+	return updateCompany, nil
 }
