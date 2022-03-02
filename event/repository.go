@@ -3,9 +3,10 @@ package event
 import "gorm.io/gorm"
 
 type Repository interface {
-	CreateNewCompany(company Company) (Company, error)
-	Update(company Company) (Company, error)
+	CreateCompany(company Company) (Company, error)
+	UpdateCompany(company Company) (Company, error)
 	FindCompanyByID(ID int) (Company, error)
+	CreateEvent(event Event) (Event, error)
 }
 
 type repository struct {
@@ -16,7 +17,7 @@ func NewRepository(db *gorm.DB) *repository {
 	return &repository{db}
 }
 
-func (r *repository) CreateNewCompany(company Company) (Company, error) {
+func (r *repository) CreateCompany(company Company) (Company, error) {
 
 	err := r.db.Create(&company).Error
 	if err != nil {
@@ -26,8 +27,8 @@ func (r *repository) CreateNewCompany(company Company) (Company, error) {
 	return company, err
 }
 
-func (r *repository) Update(company Company) (Company, error) {
-	
+func (r *repository) UpdateCompany(company Company) (Company, error) {
+
 	err := r.db.Save(&company).Error
 	if err != nil {
 		return company, err
@@ -45,4 +46,14 @@ func (r *repository) FindCompanyByID(ID int) (Company, error) {
 	}
 
 	return company, nil
+}
+
+func (r *repository) CreateEvent(event Event) (Event, error) {
+	
+	err := r.db.Create(&event).Error
+	if err != nil {
+		return event, err
+	}
+
+	return event, nil
 }

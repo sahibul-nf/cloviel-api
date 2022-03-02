@@ -3,6 +3,7 @@ package handler
 import (
 	"cloviel-api/event"
 	"cloviel-api/helper"
+	"cloviel-api/user"
 	"fmt"
 	"net/http"
 	"path/filepath"
@@ -53,7 +54,7 @@ func (h *eventHandler) CreateNewCompany(c *gin.Context) {
 func (h *eventHandler) UploadCompanyLogo(c *gin.Context) {
 
 	// mapping input form
-	var input event.SaveCompanyLogoInput
+	var input event.CompanyLogoInput
 	err := c.ShouldBind(&input)
 	if err != nil {
 		errorFormatter := helper.ErrorValidationFormat(err)
@@ -133,5 +134,39 @@ func (h *eventHandler) UploadCompanyLogo(c *gin.Context) {
 	data := gin.H{"is_uploaded": true, "errors": nil}
 
 	response := helper.APIResponse("Successfuly to upload company logo", "success", http.StatusOK, data)
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *eventHandler) CreateNewEvent(c *gin.Context) {
+	// mapping input JSON to Eventinput struct
+	var input event.EventInput
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errorFormatter := helper.ErrorValidationFormat(err)
+		errorMessage := gin.H{"errors": errorFormatter}
+
+		response := helper.APIResponse("Failed to create event", "error", http.StatusUnprocessableEntity, errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	currentUser := c.MustGet("currentUser").(user.User)
+	input.User = currentUser
+
+	// passing EventInput to service
+	newEvent, err := h.eventService.CreateNewEvent(input)
+	if err != nil {
+		errorFormatter := helper.ErrorValidationFormat(err)
+		errorMessage := gin.H{"errors": errorFormatter}
+
+		response := helper.APIResponse("Failed to create event", "error", http.StatusInternalServerError, errorMessage)
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	responseFormatter := event.FormatEvent(newEvent)
+
+	// return response to client
+	response := helper.APIResponse("Successfully to create company", "success", http.StatusOK, responseFormatter)
 	c.JSON(http.StatusOK, response)
 }
