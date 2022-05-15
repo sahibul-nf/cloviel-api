@@ -39,7 +39,7 @@ type EventFormatter struct {
 	ClosingRegistration time.Time        `json:"closing_registration"`
 	CategoryID          int32            `json:"category_id"`
 	CompanyID           int32            `json:"company_id"`
-	UserID              int32            `json:"user_id"`
+	UserID              int            `json:"user_id"`
 }
 
 type UserEventFormatter struct {

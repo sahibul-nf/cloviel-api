@@ -7,6 +7,8 @@ type Repository interface {
 	UpdateCompany(company Company) (Company, error)
 	FindCompanyByID(ID int) (Company, error)
 	CreateEvent(event Event) (Event, error)
+	UpdateEvent(event Event) (Event, error)
+	FindEventByID(ID int) (Event, error)
 }
 
 type repository struct {
@@ -51,6 +53,28 @@ func (r *repository) FindCompanyByID(ID int) (Company, error) {
 func (r *repository) CreateEvent(event Event) (Event, error) {
 	
 	err := r.db.Create(&event).Error
+	if err != nil {
+		return event, err
+	}
+
+	return event, nil
+}
+
+func (r *repository) UpdateEvent(event Event) (Event, error) {
+	
+	err := r.db.Save(&event).Error
+	if err != nil {
+		return event, err
+	}
+
+	return event, nil
+}
+
+func (r *repository) FindEventByID(ID int) (Event, error) {
+	
+	var event Event
+
+	err := r.db.Where("id = ?", ID).Find(&event).Error
 	if err != nil {
 		return event, err
 	}

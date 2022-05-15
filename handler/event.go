@@ -170,3 +170,45 @@ func (h *eventHandler) CreateNewEvent(c *gin.Context) {
 	response := helper.APIResponse("Successfully to create company", "success", http.StatusOK, responseFormatter)
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *eventHandler) UpdateEvent(c *gin.Context) {
+
+	var inputID event.GetEventDetailInput
+
+	err := c.ShouldBindUri(&inputID)
+	if err != nil {
+		response := helper.APIResponse("Failed to update event", "error", http.StatusBadRequest, nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	var inputData event.EventInput
+	err = c.ShouldBindJSON(&inputData)
+	if err != nil {
+		errorFormatter := helper.ErrorValidationFormat(err)
+		errorMessage := gin.H{"errors": errorFormatter}
+
+		response := helper.APIResponse("Failed to update event", "error", http.StatusUnprocessableEntity, errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	currentUser := c.MustGet("currentUser").(user.User)
+	inputData.User = currentUser
+
+	updatedEvent, err := h.eventService.UpdateEvent(inputID, inputData)
+	if err != nil {
+		errorFormatter := helper.ErrorValidationFormat(err)
+		errorMessage := gin.H{"errors": errorFormatter}
+
+		response := helper.APIResponse("Failed to update event", "error", http.StatusInternalServerError, errorMessage)
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	responseFormatter := event.FormatEvent(updatedEvent)
+
+	// return response to client
+	response := helper.APIResponse("Successfully to update event", "success", http.StatusOK, responseFormatter)
+	c.JSON(http.StatusOK, response)
+}

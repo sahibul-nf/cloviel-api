@@ -41,6 +41,7 @@ func main() {
 
 		// event
 		apiV1.POST("/events", middleware.AuthMiddleware(authService, userService), eventHandler.CreateNewEvent)
+		apiV1.PUT("/events/:id", middleware.AuthMiddleware(authService, userService), eventHandler.UpdateEvent)
 		apiV1.POST("/events/company", middleware.AuthMiddleware(authService, userService), eventHandler.CreateNewCompany)
 		apiV1.POST("/events/company/logo", middleware.AuthMiddleware(authService, userService), eventHandler.UploadCompanyLogo)
 	}

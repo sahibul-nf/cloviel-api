@@ -7,7 +7,7 @@ import (
 
 type Event struct {
 	ID                  int32     `gorm:"column:id;type:int;primaryKey;autoIncrement"`
-	UserID              int32     `gorm:"column:user_id;type:int"`
+	UserID              int     `gorm:"column:user_id;type:int"`
 	CategoryID          int32     `gorm:"column:category_id;type:int32"`
 	CompanyID           int32     `gorm:"column:company_id;type:int"`
 	Title               string    `gorm:"column:title;size:255"`
