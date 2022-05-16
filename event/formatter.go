@@ -1,6 +1,7 @@
 package event
 
 import (
+	"cloviel-api/company"
 	"strings"
 	"time"
 )
@@ -13,7 +14,7 @@ type CompanyFormatter struct {
 	ShortDescription string `json:"short_description"`
 }
 
-func FormatCompany(company Company) CompanyFormatter {
+func FormatCompany(company company.Company) CompanyFormatter {
 
 	formatter := CompanyFormatter{}
 	formatter.ID = company.ID

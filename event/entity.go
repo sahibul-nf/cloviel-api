@@ -1,13 +1,14 @@
 package event
 
 import (
+	"cloviel-api/company"
 	"cloviel-api/user"
 	"time"
 )
 
 type Event struct {
 	ID                  int32     `gorm:"column:id;type:int;primaryKey;autoIncrement"`
-	UserID              int     `gorm:"column:user_id;type:int"`
+	UserID              int       `gorm:"column:user_id;type:int"`
 	CategoryID          int32     `gorm:"column:category_id;type:int32"`
 	CompanyID           int32     `gorm:"column:company_id;type:int"`
 	Title               string    `gorm:"column:title;size:255"`
@@ -23,15 +24,5 @@ type Event struct {
 	CreatedAt           time.Time `gorm:"column:created_at;type:timestamp"`
 	UpdatedAt           time.Time `gorm:"column:updated_at;type:timestamp"`
 	User                user.User
-	Company             Company
-}
-
-type Company struct {
-	ID               int       `gorm:"column:id;type:int;primaryKey;autoIncrement"`
-	Name             string    `gorm:"column:name;size:100"`
-	ShortDescription string    `gorm:"column:short_description;size:255"`
-	WebURL           string    `gorm:"column:web_url;size:255"`
-	LogoURL          string    `gorm:"column:logo_url;size:255"`
-	CreatedAt        time.Time `gorm:"column:created_at;type:timestamp"`
-	UpdatedAt        time.Time `gorm:"column:updated_at;type:timestamp"`
+	Company             company.Company
 }

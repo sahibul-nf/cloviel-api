@@ -1,12 +1,15 @@
 package event
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"net/http"
+)
 
 type Service interface {
-	CreateNewCompany(input CompanyInput) (Company, error)
-	SaveCompanyLogo(ID int, fileLocation string) (Company, error)
 	CreateNewEvent(input EventInput) (Event, error)
 	UpdateEvent(eventID GetEventDetailInput, inputData EventInput) (Event, error)
+	DeleteEvent(eventID int, userID int) (bool, int, string)
 }
 
 type service struct {
@@ -15,37 +18,6 @@ type service struct {
 
 func NewService(repo Repository) *service {
 	return &service{repo}
-}
-
-func (s *service) CreateNewCompany(input CompanyInput) (Company, error) {
-
-	company := Company{}
-	company.Name = input.Name
-	company.WebURL = input.WebURL
-	company.ShortDescription = input.ShortDescription
-
-	newCompany, err := s.repository.CreateCompany(company)
-	if err != nil {
-		return newCompany, err
-	}
-
-	return newCompany, err
-}
-
-func (s *service) SaveCompanyLogo(ID int, fileLocation string) (Company, error) {
-
-	company, err := s.repository.FindCompanyByID(ID)
-	if err != nil {
-		return company, err
-	}
-
-	company.LogoURL = fileLocation
-	updateCompany, err := s.repository.UpdateCompany(company)
-	if err != nil {
-		return company, err
-	}
-
-	return updateCompany, nil
 }
 
 func (s *service) CreateNewEvent(input EventInput) (Event, error) {
@@ -80,7 +52,7 @@ func (s *service) UpdateEvent(eventID GetEventDetailInput, inputData EventInput)
 	}
 
 	if event.UserID != inputData.User.ID {
-		return event, errors.New("Not an owner of the event")
+		return event, errors.New("not an owner of the event")
 	}
 
 	event.Title = inputData.Title
@@ -101,4 +73,29 @@ func (s *service) UpdateEvent(eventID GetEventDetailInput, inputData EventInput)
 	}
 
 	return updatedEvent, nil
+}
+
+func (s *service) DeleteEvent(eventID int, userID int) (bool, int, string) {
+
+	event, err := s.repository.FindEventByID(eventID)
+
+	if err != nil {
+		return false, http.StatusInternalServerError, err.Error()
+	}
+
+	if event.ID != int32(eventID) {
+		message := fmt.Sprintf("Event with ID %d is not available", eventID)
+		return false, http.StatusNotFound, errors.New(message).Error()
+	}
+
+	if event.UserID != userID {
+		return false, http.StatusForbidden, errors.New("not an owner of the event").Error()
+	}
+
+	isDeleted, err := s.repository.DeleteEvent(int(event.ID))
+	if err != nil {
+		return false, http.StatusInternalServerError, err.Error()
+	}
+
+	return isDeleted, http.StatusOK, ""
 }

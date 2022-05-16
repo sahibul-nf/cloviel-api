@@ -2,6 +2,7 @@ package main
 
 import (
 	"cloviel-api/auth"
+	"cloviel-api/company"
 	"cloviel-api/config"
 	"cloviel-api/event"
 	"cloviel-api/handler"
@@ -24,6 +25,11 @@ var (
 	eventRepo    = event.NewRepository(db)
 	eventService = event.NewService(eventRepo)
 	eventHandler = handler.NewEventHandler(eventService)
+
+	// company endpoint
+	companyRepo    = company.NewRepository(db)
+	companyService = company.NewService(companyRepo)
+	companyHandler = handler.NewCompanyHandler(companyService)
 )
 
 func main() {
@@ -42,8 +48,11 @@ func main() {
 		// event
 		apiV1.POST("/events", middleware.AuthMiddleware(authService, userService), eventHandler.CreateNewEvent)
 		apiV1.PUT("/events/:id", middleware.AuthMiddleware(authService, userService), eventHandler.UpdateEvent)
-		apiV1.POST("/events/company", middleware.AuthMiddleware(authService, userService), eventHandler.CreateNewCompany)
-		apiV1.POST("/events/company/logo", middleware.AuthMiddleware(authService, userService), eventHandler.UploadCompanyLogo)
+		apiV1.DELETE("/events/:id", middleware.AuthMiddleware(authService, userService), eventHandler.DeleteEvent)
+
+		// company
+		apiV1.POST("/companies", middleware.AuthMiddleware(authService, userService), companyHandler.CreateNewCompany)
+		apiV1.POST("/companies/logo", middleware.AuthMiddleware(authService, userService), companyHandler.UploadCompanyLogo)
 	}
 
 	server.Run()
