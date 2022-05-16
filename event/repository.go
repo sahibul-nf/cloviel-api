@@ -8,6 +8,7 @@ type Repository interface {
 	DeleteEvent(ID int) (bool, error)
 	FindEventByID(ID int) (Event, error)
 	FindAllEvent() ([]Event, error)
+	FindAllEventByUserID(userID int) ([]Event, error)
 }
 
 type repository struct {
@@ -63,11 +64,22 @@ func (r *repository) FindEventByID(ID int) (Event, error) {
 }
 
 func (r *repository) FindAllEvent() ([]Event, error) {
-	
+
 	var events []Event
 
 	err := r.db.Find(&events).Error
+	if err != nil {
+		return events, err
+	}
 
+	return events, nil
+}
+
+func (r *repository) FindAllEventByUserID(userID int) ([]Event, error) {
+
+	var events []Event
+
+	err := r.db.Where("user_id = ?", userID).Find(&events).Error
 	if err != nil {
 		return events, err
 	}

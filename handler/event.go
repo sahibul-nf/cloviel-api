@@ -5,6 +5,7 @@ import (
 	"cloviel-api/helper"
 	"cloviel-api/user"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -130,4 +131,22 @@ func (h *eventHandler) DeleteEvent(c *gin.Context) {
 	// return response to client
 	response := helper.APIResponse("Successfully to delete event", "success", statusCode, responseFormatter)
 	c.JSON(statusCode, response)
+}
+
+func (h *eventHandler) GetAllEvent(c *gin.Context) {
+	userID, _ := strconv.Atoi(c.Query("user_id"))
+
+	events, statusCode, err := h.eventService.GetAllEvent(userID)
+	if err != nil {
+		eventsFormatter := event.FormatEvents(events)
+
+		response := helper.APIResponse("Failed to get list event", "error", statusCode, eventsFormatter)
+		c.JSON(statusCode, response)
+		return
+	}
+
+	eventsFormatter := event.FormatEvents(events)
+
+	response := helper.APIResponse("Successfuly get list of events", "success", http.StatusOK, eventsFormatter)
+	c.JSON(http.StatusOK, response)
 }

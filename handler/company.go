@@ -2,7 +2,6 @@ package handler
 
 import (
 	"cloviel-api/company"
-	"cloviel-api/event"
 	"cloviel-api/helper"
 	"fmt"
 	"net/http"
@@ -44,7 +43,7 @@ func (h *companyHandler) CreateNewCompany(c *gin.Context) {
 		return
 	}
 
-	responseFormatter := event.FormatCompany(newCompany)
+	responseFormatter := company.FormatCompany(newCompany)
 
 	// return response to client
 	response := helper.APIResponse("Successfully to create company", "success", http.StatusOK, responseFormatter)

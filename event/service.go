@@ -10,6 +10,7 @@ type Service interface {
 	CreateNewEvent(input EventInput) (Event, error)
 	UpdateEvent(eventID GetEventDetailInput, inputData EventInput) (Event, error)
 	DeleteEvent(eventID int, userID int) (bool, int, string)
+	GetAllEvent(userID int) ([]Event, int, error)
 }
 
 type service struct {
@@ -98,4 +99,23 @@ func (s *service) DeleteEvent(eventID int, userID int) (bool, int, string) {
 	}
 
 	return isDeleted, http.StatusOK, ""
+}
+
+func (s *service) GetAllEvent(userID int) ([]Event, int, error) {
+
+	if userID != 0 {
+		events, err := s.repository.FindAllEventByUserID(userID)
+		if err != nil {
+			return events, http.StatusInternalServerError, err
+		}
+
+		return events, http.StatusOK, nil
+	}
+
+	events, err := s.repository.FindAllEvent()
+	if err != nil {
+		return events, http.StatusInternalServerError, err
+	}
+
+	return events, http.StatusOK, nil
 }
