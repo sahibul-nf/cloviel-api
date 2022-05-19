@@ -11,6 +11,7 @@ type Service interface {
 	UpdateEvent(eventID GetEventDetailInput, inputData EventInput) (Event, error)
 	DeleteEvent(eventID int, userID int) (bool, int, string)
 	GetAllEvent(userID int) ([]Event, int, error)
+	GetEvent(eventID GetEventDetailInput) (Event, int, error)
 }
 
 type service struct {
@@ -63,10 +64,6 @@ func (s *service) UpdateEvent(eventID GetEventDetailInput, inputData EventInput)
 	event.ClosingRegistration = inputData.ClosingRegistration
 	event.LimitedTo = inputData.LimitedTo
 	event.CompanyID = inputData.CompanyID
-	event.UserID = inputData.User.ID
-	event.Status = "on going"
-
-	// TODO: fill CategoryID variabel
 
 	updatedEvent, err := s.repository.UpdateEvent(event)
 	if err != nil {
@@ -118,4 +115,21 @@ func (s *service) GetAllEvent(userID int) ([]Event, int, error) {
 	}
 
 	return events, http.StatusOK, nil
+}
+
+func (s *service) GetEvent(eventID GetEventDetailInput) (Event, int, error) {
+
+	ID := eventID.ID
+
+	event, err := s.repository.FindEventByID(ID)
+	if err != nil {
+		return event, http.StatusInternalServerError, err
+	}
+
+	if event.ID != int32(ID) {
+		message := fmt.Sprintf("Event with ID %d is not available", eventID)
+		return Event{}, http.StatusNotFound, errors.New(message)
+	}
+
+	return event, http.StatusOK, nil
 }

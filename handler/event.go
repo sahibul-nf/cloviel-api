@@ -45,7 +45,7 @@ func (h *eventHandler) CreateNewEvent(c *gin.Context) {
 		return
 	}
 
-	responseFormatter := event.FormatEvent(newEvent)
+	responseFormatter := event.FormatDetailEvent(newEvent)
 
 	// return response to client
 	response := helper.APIResponse("Successfully to create company", "success", http.StatusOK, responseFormatter)
@@ -87,7 +87,7 @@ func (h *eventHandler) UpdateEvent(c *gin.Context) {
 		return
 	}
 
-	responseFormatter := event.FormatEvent(updatedEvent)
+	responseFormatter := event.FormatDetailEvent(updatedEvent)
 
 	// return response to client
 	response := helper.APIResponse("Successfully to update event", "success", http.StatusOK, responseFormatter)
@@ -148,5 +148,29 @@ func (h *eventHandler) GetAllEvent(c *gin.Context) {
 	eventsFormatter := event.FormatEvents(events)
 
 	response := helper.APIResponse("Successfuly get list of events", "success", http.StatusOK, eventsFormatter)
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *eventHandler) GetEventDetails(c *gin.Context) {
+	var inputID event.GetEventDetailInput
+
+	err := c.ShouldBindUri(&inputID)
+	if err != nil {
+		response := helper.APIResponse("Failed to get event details", "error", http.StatusBadRequest, nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	eventDetail, statusCode, err := h.eventService.GetEvent(inputID)
+	if err != nil {
+
+		response := helper.APIResponse(err.Error(), "error", statusCode, nil)
+		c.JSON(statusCode, response)
+		return
+	}
+
+	responseFormatter := event.FormatDetailEvent(eventDetail)
+
+	response := helper.APIResponse("Successfuly get event details", "success", http.StatusOK, responseFormatter)
 	c.JSON(http.StatusOK, response)
 }

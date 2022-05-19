@@ -47,6 +47,7 @@ func main() {
 
 		// event
 		apiV1.GET("/events", eventHandler.GetAllEvent)
+		apiV1.GET("/events/:id", eventHandler.GetEventDetails)
 		apiV1.POST("/events", middleware.AuthMiddleware(authService, userService), eventHandler.CreateNewEvent)
 		apiV1.PUT("/events/:id", middleware.AuthMiddleware(authService, userService), eventHandler.UpdateEvent)
 		apiV1.DELETE("/events/:id", middleware.AuthMiddleware(authService, userService), eventHandler.DeleteEvent)

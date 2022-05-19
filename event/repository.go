@@ -55,7 +55,7 @@ func (r *repository) FindEventByID(ID int) (Event, error) {
 
 	var event Event
 
-	err := r.db.Where("id = ?", ID).Find(&event).Error
+	err := r.db.Preload("User").Preload("Company").Where("id = ?", ID).Find(&event).Error
 	if err != nil {
 		return event, err
 	}
