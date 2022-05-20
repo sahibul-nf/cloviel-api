@@ -9,6 +9,10 @@ type GetEventDetailInput struct {
 	ID int `uri:"id" binding:"required"`
 }
 
+type SaveEventThumbnailInput struct {
+	EventID int `form:"event_id" binding:"required"`
+}
+
 type EventInput struct {
 	Title               string    `json:"title" binding:"required"`
 	Description         string    `json:"description" binding:"required"`

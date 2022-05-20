@@ -97,11 +97,7 @@ func (h *userHandler) LoginUser(c *gin.Context) {
 
 func (h *userHandler) UploadAvatar(c *gin.Context) {
 
-	fileExtSupport := []string{
-		".png",
-		".jpeg",
-		".jpg",
-	}
+	fileExtSupport := helper.FileExtSupport()
 
 	// get input form data
 	file, err := c.FormFile("avatar")

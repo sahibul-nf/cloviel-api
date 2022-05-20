@@ -80,11 +80,7 @@ func (h *companyHandler) UploadCompanyLogo(c *gin.Context) {
 		return
 	}
 
-	fileExtSupport := []string{
-		".png",
-		".jpeg",
-		".jpg",
-	}
+	fileExtSupport := helper.FileExtSupport()
 
 	// cek file extention
 	fileExtension := filepath.Ext(file.Filename)

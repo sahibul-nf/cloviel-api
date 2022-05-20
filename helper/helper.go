@@ -37,3 +37,14 @@ func ErrorValidationFormat(err error) []string {
 
 	return errors
 }
+
+func FileExtSupport() []string {
+
+	extImage := []string{
+		".png",
+		".jpeg",
+		".jpg",
+	}
+
+	return extImage
+}

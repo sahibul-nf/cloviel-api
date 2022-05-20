@@ -11,7 +11,8 @@ type Service interface {
 	UpdateEvent(eventID GetEventDetailInput, inputData EventInput) (Event, error)
 	DeleteEvent(eventID int, userID int) (bool, int, string)
 	GetAllEvent(userID int) ([]Event, int, error)
-	GetEvent(eventID GetEventDetailInput) (Event, int, error)
+	GetEvent(eventID int) (Event, int, error)
+	SaveEventThumbnail(event Event, fileLocation string) (Event, int, error)
 }
 
 type service struct {
@@ -117,9 +118,9 @@ func (s *service) GetAllEvent(userID int) ([]Event, int, error) {
 	return events, http.StatusOK, nil
 }
 
-func (s *service) GetEvent(eventID GetEventDetailInput) (Event, int, error) {
+func (s *service) GetEvent(eventID int) (Event, int, error) {
 
-	ID := eventID.ID
+	ID := eventID
 
 	event, err := s.repository.FindEventByID(ID)
 	if err != nil {
@@ -132,4 +133,17 @@ func (s *service) GetEvent(eventID GetEventDetailInput) (Event, int, error) {
 	}
 
 	return event, http.StatusOK, nil
+}
+
+func (s *service) SaveEventThumbnail(event Event, fileLocation string) (Event, int, error) {
+
+	event.Thumbnail = fileLocation
+
+	updatedEvent, err := s.repository.UpdateEvent(event)
+	if err != nil {
+		return updatedEvent, http.StatusInternalServerError, err
+	}
+
+	return updatedEvent, http.StatusOK, nil
+
 }
