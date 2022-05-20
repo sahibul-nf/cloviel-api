@@ -120,8 +120,8 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 			"errors":      "The provided file format is not allowed. Please upload a JPEG or PNG image",
 		}
 
-		response := helper.APIResponse("Failed to upload avatar image", "error", http.StatusBadGateway, data)
-		c.JSON(http.StatusBadGateway, response)
+		response := helper.APIResponse("Failed to upload avatar image", "error", http.StatusUnsupportedMediaType, data)
+		c.JSON(http.StatusUnsupportedMediaType, response)
 		return
 	}
 

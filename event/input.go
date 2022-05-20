@@ -9,7 +9,7 @@ type GetEventDetailInput struct {
 	ID int `uri:"id" binding:"required"`
 }
 
-type SaveEventThumbnailInput struct {
+type SaveEventImageInput struct {
 	EventID int `form:"event_id" binding:"required"`
 }
 

@@ -13,6 +13,7 @@ type Service interface {
 	GetAllEvent(userID int) ([]Event, int, error)
 	GetEvent(eventID int) (Event, int, error)
 	SaveEventThumbnail(event Event, fileLocation string) (Event, int, error)
+	SaveEventSignature(event Event, fileLocation string) (Event, error)
 }
 
 type service struct {
@@ -146,4 +147,16 @@ func (s *service) SaveEventThumbnail(event Event, fileLocation string) (Event, i
 
 	return updatedEvent, http.StatusOK, nil
 
+}
+
+func (s *service) SaveEventSignature(event Event, fileLocation string) (Event, error) {
+
+	event.SignatureImage = fileLocation
+
+	updatedEvent, err := s.repository.UpdateEvent(event)
+	if err != nil {
+		return updatedEvent, err
+	}
+
+	return updatedEvent, nil
 }

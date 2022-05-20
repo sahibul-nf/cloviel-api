@@ -180,7 +180,7 @@ func (h *eventHandler) GetEventDetails(c *gin.Context) {
 func (h *eventHandler) UploadEventThumbnail(c *gin.Context) {
 	fileExtSupport := helper.FileExtSupport()
 
-	var input event.SaveEventThumbnailInput
+	var input event.SaveEventImageInput
 
 	err := c.ShouldBind(&input)
 	if err != nil {
@@ -217,8 +217,8 @@ func (h *eventHandler) UploadEventThumbnail(c *gin.Context) {
 			"errors":      "The provided file format is not allowed. Please upload a JPEG or PNG image",
 		}
 
-		response := helper.APIResponse("Failed to upload the thumbnail image of event", "error", http.StatusBadRequest, data)
-		c.JSON(http.StatusBadGateway, response)
+		response := helper.APIResponse("Failed to upload the thumbnail image of event", "error", http.StatusUnsupportedMediaType, data)
+		c.JSON(http.StatusUnsupportedMediaType, response)
 		return
 	}
 
@@ -239,7 +239,7 @@ func (h *eventHandler) UploadEventThumbnail(c *gin.Context) {
 	userID := currentUser.ID
 
 	// make path location for save avatar
-	path := fmt.Sprintf("assets/event-images/e%du%d-%s", input.EventID, userID, file.Filename)
+	path := fmt.Sprintf("assets/event-images/thumbnail/e%du%d-%s", input.EventID, userID, file.Filename)
 
 	// upload avatar ke server
 	err = c.SaveUploadedFile(file, path)
@@ -270,5 +270,101 @@ func (h *eventHandler) UploadEventThumbnail(c *gin.Context) {
 	data := gin.H{"is_uploaded": true}
 
 	response := helper.APIResponse("Event thumbnail successfuly uploaded", "success", http.StatusOK, data)
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *eventHandler) UploadEventSignature(c *gin.Context) {
+	fileExtSupport := helper.FileExtSupport()
+
+	var input event.SaveEventImageInput
+
+	err := c.ShouldBind(&input)
+	if err != nil {
+		errorFormatter := helper.ErrorValidationFormat(err)
+
+		errorMessage := gin.H{
+			"is_uploaded": false,
+			"errors":      errorFormatter,
+		}
+
+		response := helper.APIResponse("Failed to upload the signature image of event", "error", http.StatusUnprocessableEntity, errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	// get input form data
+	file, err := c.FormFile("signature")
+	if err != nil {
+		data := gin.H{
+			"is_uploaded": false,
+			"errors":      err.Error(),
+		}
+
+		response := helper.APIResponse("Failed to upload the signature image of event", "error", http.StatusBadRequest, data)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// cek file extention
+	fileExtension := filepath.Ext(file.Filename)
+	if fileExtension != fileExtSupport[0] && fileExtension != fileExtSupport[1] && fileExtension != fileExtSupport[2] {
+		data := gin.H{
+			"is_uploaded": false,
+			"errors":      "The provided file format is not allowed. Please upload a JPEG or PNG image",
+		}
+
+		response := helper.APIResponse("Failed to upload the signature image of event", "error", http.StatusUnsupportedMediaType, data)
+		c.JSON(http.StatusUnsupportedMediaType, response)
+		return
+	}
+
+	event, statusCode, err := h.eventService.GetEvent(input.EventID)
+	if err != nil {
+		data := gin.H{
+			"is_uploaded": false,
+			"errors":      err.Error(),
+		}
+
+		response := helper.APIResponse("Failed to upload the signature image of event", "error", statusCode, data)
+		c.JSON(statusCode, response)
+		return
+	}
+
+	// get userID from currentUser (middleware)
+	currentUser := c.MustGet("currentUser").(user.User)
+	userID := currentUser.ID
+
+	// make path location for save avatar
+	path := fmt.Sprintf("assets/event-images/signature/e%du%d-%s", input.EventID, userID, file.Filename)
+
+	// upload avatar ke server
+	err = c.SaveUploadedFile(file, path)
+	if err != nil {
+		data := gin.H{
+			"is_uploaded": false,
+			"errors":      err.Error(),
+		}
+
+		response := helper.APIResponse("Failed to upload the signature image of event", "error", http.StatusInternalServerError, data)
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	// passing path to service for save to db
+	_, err = h.eventService.SaveEventSignature(event, path)
+	if err != nil {
+		data := gin.H{
+			"is_uploaded": false,
+			"errors":      err.Error(),
+		}
+
+		response := helper.APIResponse("Failed to upload the signature image of event", "error", http.StatusInternalServerError, data)
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	data := gin.H{"is_uploaded": true}
+
+	response := helper.APIResponse("Event signature successfuly uploaded", "success", http.StatusOK, data)
 	c.JSON(http.StatusOK, response)
 }
