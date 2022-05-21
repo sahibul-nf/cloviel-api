@@ -1,7 +1,9 @@
 package event_test
 
-import "testing"
+import (
+	"testing"
+)
 
-func TestEvent(testing *testing.T)  {
-	
+func TestEvent(testing *testing.T) {
+
 }
