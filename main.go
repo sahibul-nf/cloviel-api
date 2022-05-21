@@ -66,6 +66,7 @@ func main() {
 
 		// presenter of event
 		apiV1.POST("/events/presenters", middleware.AuthMiddleware(authService, userService), presenterHandler.CreateNewPresenter)
+		apiV1.PUT("/events/presenters/:id", middleware.AuthMiddleware(authService, userService), presenterHandler.UpdatePresenter)
 	}
 
 	server.Run()

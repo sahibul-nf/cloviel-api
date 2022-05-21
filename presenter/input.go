@@ -8,3 +8,7 @@ type PresenterInput struct {
 	ShortDescription string `json:"short_description" binding:"required"`
 	User             user.User
 }
+
+type PresenterDetailInput struct {
+	ID int `uri:"id" binding:"required"`
+}
