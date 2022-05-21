@@ -2,6 +2,7 @@ package event
 
 import (
 	"cloviel-api/company"
+	"cloviel-api/presenter"
 	"cloviel-api/user"
 	"time"
 )
@@ -25,4 +26,5 @@ type Event struct {
 	UpdatedAt           time.Time `gorm:"column:updated_at;type:timestamp"`
 	User                user.User
 	Company             company.Company
+	Presenters          []presenter.Presenter
 }

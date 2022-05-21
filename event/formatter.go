@@ -2,27 +2,29 @@ package event
 
 import (
 	"cloviel-api/company"
+	"cloviel-api/presenter"
 	"strings"
 	"time"
 )
 
 type EventFormatter struct {
-	ID                  int32                    `json:"id"`
-	Title               string                   `json:"title"`
-	Description         string                   `json:"description"`
-	Perks               []string                 `json:"perks"`
-	Status              string                   `json:"status"`
-	MemberCount         int32                    `json:"member_count"`
-	LimitedTo           int32                    `json:"limited_to"`
-	Thumbnail           string                   `json:"thumbnail"`
-	SignatureImage      string                   `json:"signature_image"`
-	StartDate           time.Time                `json:"start_date"`
-	ClosingRegistration time.Time                `json:"closing_registration"`
-	CategoryID          int32                    `json:"category_id"`
-	CompanyID           int32                    `json:"company_id"`
-	UserID              int                      `json:"user_id"`
-	User                UserEventFormatter       `json:"user"`
-	Company             company.CompanyFormatter `json:"company"`
+	ID                  int32                          `json:"id"`
+	Title               string                         `json:"title"`
+	Description         string                         `json:"description"`
+	Perks               []string                       `json:"perks"`
+	Status              string                         `json:"status"`
+	MemberCount         int32                          `json:"member_count"`
+	LimitedTo           int32                          `json:"limited_to"`
+	Thumbnail           string                         `json:"thumbnail"`
+	SignatureImage      string                         `json:"signature_image"`
+	StartDate           time.Time                      `json:"start_date"`
+	ClosingRegistration time.Time                      `json:"closing_registration"`
+	CategoryID          int32                          `json:"category_id"`
+	CompanyID           int32                          `json:"company_id"`
+	UserID              int                            `json:"user_id"`
+	User                UserEventFormatter             `json:"user"`
+	Company             company.CompanyFormatter       `json:"company"`
+	Presenters          []presenter.PresenterFormatter `json:"presenters"`
 }
 
 type UserEventFormatter struct {
@@ -47,7 +49,6 @@ func FormatDetailEvent(event Event) EventFormatter {
 	formatter.UserID = event.UserID
 	formatter.Status = event.Status
 
-	
 	var perks []string
 	for _, perk := range strings.Split(event.Perks, ",") {
 		perks = append(perks, strings.TrimSpace(perk))
@@ -73,6 +74,14 @@ func FormatDetailEvent(event Event) EventFormatter {
 	companyFormatter.LogoURL = eventCompany.LogoURL
 
 	formatter.Company = companyFormatter
+
+	eventPresenters := event.Presenters
+	presenterFormatters := []presenter.PresenterFormatter{}
+	for _, v := range eventPresenters {
+		presenterFormatters = append(presenterFormatters, presenter.FormatPresenter(v))
+	}
+
+	formatter.Presenters = presenterFormatters
 
 	return formatter
 }
